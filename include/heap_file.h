@@ -1,6 +1,8 @@
 #ifndef HEAP_FILE_H
 #define HEAP_FILE_H
 
+#define CHARACTERISTIC 610
+
 typedef enum HP_ErrorCode {
     HP_OK,
     HP_ERROR
