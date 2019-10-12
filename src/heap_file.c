@@ -14,6 +14,10 @@
   }                         \
 }
 
+void _printRecord(Record record) {
+    printf("Record: (%d %s %s %s)\n", record.id, record.name, record.surname, record.city);
+}
+
 HP_ErrorCode HP_Init() {
     return HP_OK;
 }
