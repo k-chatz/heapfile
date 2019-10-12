@@ -128,7 +128,86 @@ HP_ErrorCode HP_CloseFile(int fileDesc) {
 }
 
 HP_ErrorCode HP_InsertEntry(int fileDesc, Record record) {
-    //insert code here
+    int usedBlocks = 0, blocks_num = 0, characteristic = 0, count = 0, next = 0;
+    char *infoBlockData = NULL, *blockData = NULL, *newBlockData = NULL;
+    BF_Block *infoBlock, *block, *newBlock;
+
+    BF_Block_Init(&block);
+    BF_Block_Init(&infoBlock);
+
+    _printRecord(record);
+
+    if (record.id == 792) {
+        printf("-");
+    }
+
+    CALL_BF(BF_GetBlock(fileDesc, 0, infoBlock));
+    infoBlockData = BF_Block_GetData(infoBlock);
+    _getCharacteristic(infoBlockData, &characteristic);
+    if (characteristic != CHARACTERISTIC) {
+        return HP_ERROR;
+    }
+    _getUsedBlocks(infoBlockData, &usedBlocks);
+    _getDataBlockNumber(infoBlockData, &next);
+
+    // If data block not yet exists, then a new one is about to be created.
+    if (!next) {
+        CALL_BF(BF_AllocateBlock(fileDesc, block));
+        blockData = BF_Block_GetData(block);
+        _setRecord(blockData, 0, &record);
+        _setCount(blockData, 1);
+        _setNext(blockData, -1);
+        BF_Block_SetDirty(block);
+        CALL_BF(BF_UnpinBlock(block));
+        /*Update info block data*/
+        CALL_BF(BF_GetBlockCounter(fileDesc, &blocks_num));
+        _setDataBlockNumber(infoBlockData, blocks_num - 1);
+        _setUsedBlocks(infoBlockData, usedBlocks + 1);
+        BF_Block_SetDirty(infoBlock);
+    } else {
+        do {
+            CALL_BF(BF_GetBlock(fileDesc, next, block))
+            blockData = BF_Block_GetData(block);
+            _getNext(blockData, &next);
+
+            if (!_isFull(blockData, &count)) {
+                _setRecord(blockData, count, &record);
+                _setCount(blockData, count + 1);
+                BF_Block_SetDirty(block);
+                CALL_BF(BF_UnpinBlock(block));
+                break;
+            } else {
+                if (next > 0) {
+                    CALL_BF(BF_UnpinBlock(block));
+                    continue;
+                }
+
+                BF_Block_Init(&newBlock);
+                CALL_BF(BF_AllocateBlock(fileDesc, newBlock));
+                newBlockData = BF_Block_GetData(newBlock);
+                _setRecord(newBlockData, 0, &record);
+                _setCount(newBlockData, 1);
+                _setNext(newBlockData, -1);
+                BF_Block_SetDirty(newBlock);
+                CALL_BF(BF_UnpinBlock(newBlock));
+                BF_Block_Destroy(&newBlock);
+
+                CALL_BF(BF_GetBlockCounter(fileDesc, &blocks_num));
+                _setNext(blockData, blocks_num - 1);
+                BF_Block_SetDirty(block);
+                CALL_BF(BF_UnpinBlock(block));
+
+                /*Update info block data*/
+                _setUsedBlocks(infoBlockData, usedBlocks + 1);
+                BF_Block_SetDirty(infoBlock);
+            }
+        } while (next > 0);
+    }
+
+    BF_Block_Destroy(&block);
+
+    CALL_BF(BF_UnpinBlock(infoBlock));
+    BF_Block_Destroy(&infoBlock);
     return HP_OK;
 }
 
