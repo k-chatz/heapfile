@@ -5,14 +5,8 @@
 #include "bf.h"
 #include "heap_file.h"
 
-#define CALL_BF(call)       \
-{                           \
-  BF_ErrorCode code = call; \
-  if (code != BF_OK) {         \
-    BF_PrintError(code);    \
-    return HP_ERROR;        \
-  }                         \
-}
+#define CALL_BF(call){ BF_ErrorCode code = call; if (code != BF_OK) {BF_PrintError(code); return HP_ERROR; }}
+
 #define MAX_BLOCK_RECORDS (BF_BLOCK_SIZE - 2 * sizeof(int)) / sizeof(Record)
 
 /***Private functions***/
@@ -134,12 +128,6 @@ HP_ErrorCode HP_InsertEntry(int fileDesc, Record record) {
 
     BF_Block_Init(&block);
     BF_Block_Init(&infoBlock);
-
-    _printRecord(record);
-
-    if (record.id == 792) {
-        printf("-");
-    }
 
     CALL_BF(BF_GetBlock(fileDesc, 0, infoBlock));
     infoBlockData = BF_Block_GetData(infoBlock);
