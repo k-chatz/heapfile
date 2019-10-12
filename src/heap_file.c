@@ -69,10 +69,13 @@ void _setRecord(char *block, const int offset, const Record *record) {
     memcpy(block + offset * sizeof(Record), record, sizeof(Record));
 }
 
-int _isFull(char *block) {
-    int count = 0;
-    _getCount(block, &count);
-    return count == MAX_BLOCK_RECORDS;
+/*
+ * Check if block is full.
+ * Returns 0/1
+ * Assign the current count of records in count variable.*/
+int _isFull(char *block, int *count) {
+    _getCount(block, count);
+    return *count == MAX_BLOCK_RECORDS;
 }
 
 /***Public functions***/
