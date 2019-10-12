@@ -49,7 +49,7 @@ HP_ErrorCode HP_OpenFile(const char *fileName, int *fileDesc) {
 }
 
 HP_ErrorCode HP_CloseFile(int fileDesc) {
-    //insert code here
+    CALL_BF(BF_CloseFile(fileDesc))
     return HP_OK;
 }
 
