@@ -102,7 +102,20 @@ HP_ErrorCode HP_CreateFile(const char *filename) {
 }
 
 HP_ErrorCode HP_OpenFile(const char *fileName, int *fileDesc) {
-    //insert code here
+    char *infoBlockData = NULL;
+    int characteristic = 0, next = 0;
+    BF_Block *infoBlock;
+    BF_Block_Init(&infoBlock);
+    CALL_BF(BF_OpenFile(fileName, fileDesc))
+    CALL_BF(BF_GetBlock(*fileDesc, 0, infoBlock));
+    infoBlockData = BF_Block_GetData(infoBlock);
+    _getCharacteristic(infoBlockData, &characteristic);
+    _getNext(infoBlockData, &next);
+    if (characteristic != CHARACTERISTIC) {
+        return HP_ERROR;
+    }
+    //CALL_BF(BF_UnpinBlock(infoBlock))
+    //BF_Block_Destroy(&infoBlock);
     return HP_OK;
 }
 
