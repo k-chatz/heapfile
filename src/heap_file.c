@@ -82,7 +82,7 @@ HP_ErrorCode HP_Init() {
 }
 
 HP_ErrorCode HP_CreateFile(const char *filename) {
-    int usedBlocks = 0, dataBlockNumber = 0, fd = 0, characteristic = CHARACTERISTIC;
+    int fd = 0;
     char *infoBlockData = NULL;
     BF_Block *infoBlock;
     BF_Block_Init(&infoBlock);
@@ -90,11 +90,10 @@ HP_ErrorCode HP_CreateFile(const char *filename) {
     CALL_BF(BF_OpenFile(filename, &fd))
     CALL_BF(BF_AllocateBlock(fd, infoBlock))
     infoBlockData = BF_Block_GetData(infoBlock);
-
-    memcpy(infoBlockData, &characteristic, sizeof(characteristic));
-    memcpy(infoBlockData + sizeof(characteristic), &usedBlocks, sizeof(usedBlocks));
-    memcpy(infoBlockData + sizeof(characteristic) + sizeof(usedBlocks), &dataBlockNumber, sizeof(dataBlockNumber));
-
+    _setCharacteristic(infoBlockData, CHARACTERISTIC);
+    _setUsedBlocks(infoBlockData, 0);
+    _setDataBlockNumber(infoBlockData, 0);
+    _setNext(infoBlockData, -1);
     BF_Block_SetDirty(infoBlock);
     CALL_BF(BF_UnpinBlock(infoBlock))
     CALL_BF(BF_CloseFile(fd))
