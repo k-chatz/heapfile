@@ -212,7 +212,47 @@ HP_ErrorCode HP_InsertEntry(int fileDesc, Record record) {
 }
 
 HP_ErrorCode HP_PrintAllEntries(int fileDesc, char *attrName, void *value) {
-    //insert code here
+    int count = 0, next = 0, slot = 0;
+    char *infoBlockData = NULL, *blockData = NULL;
+    Record record;
+    BF_Block *infoBlock, *block;
+    BF_Block_Init(&block);
+    BF_Block_Init(&infoBlock);
+    CALL_BF(BF_GetBlock(fileDesc, 0, infoBlock))
+    infoBlockData = BF_Block_GetData(infoBlock);
+    _getDataBlockNumber(infoBlockData, &next);
+    if (next) {
+        do {
+            CALL_BF(BF_GetBlock(fileDesc, next, block))
+            blockData = BF_Block_GetData(block);
+            _getNext(blockData, &next);
+            _getCount(blockData, &count);
+            for (slot = 0; slot < count; slot++) {
+                _getRecord(blockData, slot, &record);
+                if (strcmp(attrName, "id") == 0) {
+                    if (record.id == *(int *) value) {
+                        _printRecord(record);
+                    }
+                } else if (strcmp(attrName, "name") == 0) {
+                    if (strcmp(record.name, (char *) value) == 0) {
+                        _printRecord(record);
+                    }
+                } else if (strcmp(attrName, "surname") == 0) {
+                    if (strcmp(record.surname, (char *) value) == 0) {
+                        _printRecord(record);
+                    }
+                } else if (strcmp(attrName, "city") == 0) {
+                    if (strcmp(record.city, (char *) value) == 0) {
+                        _printRecord(record);
+                    }
+                }
+            }
+            CALL_BF(BF_UnpinBlock(block));
+        } while (next > 0);
+    }
+    CALL_BF(BF_UnpinBlock(infoBlock));
+    BF_Block_Destroy(&infoBlock);
+    BF_Block_Destroy(&block);
     return HP_OK;
 }
 
