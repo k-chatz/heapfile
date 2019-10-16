@@ -245,6 +245,38 @@ HP_ErrorCode HP_PrintAllEntries(int fileDesc, char *attrName, void *value) {
 }
 
 HP_ErrorCode HP_GetEntry(int fileDesc, int rowId, Record *record) {
-    //insert code here
-    return HP_OK;
+    int count = 0, next = 0, slot = 0, c = 1;
+    char *infoBlockData = NULL, *blockData = NULL;
+    Record r;
+    BF_Block *infoBlock, *block;
+    BF_Block_Init(&block);
+    BF_Block_Init(&infoBlock);
+    CALL_BF(BF_GetBlock(fileDesc, 0, infoBlock))
+    infoBlockData = BF_Block_GetData(infoBlock);
+    _getDataBlockNumber(infoBlockData, &next);
+    if (next) {
+        do {
+            CALL_BF(BF_GetBlock(fileDesc, next, block))
+            blockData = BF_Block_GetData(block);
+            _getNext(blockData, &next);
+            _getCount(blockData, &count);
+            for (slot = 0; slot < count; slot++) {
+                _getRecord(blockData, slot, &r);
+                if (c == rowId) {
+                    *record = r;
+                    CALL_BF(BF_UnpinBlock(block));
+                    CALL_BF(BF_UnpinBlock(infoBlock));
+                    BF_Block_Destroy(&infoBlock);
+                    BF_Block_Destroy(&block);
+                    return HP_OK;
+                }
+                c++;
+            }
+            CALL_BF(BF_UnpinBlock(block));
+        } while (next > 0);
+    }
+    CALL_BF(BF_UnpinBlock(infoBlock));
+    BF_Block_Destroy(&infoBlock);
+    BF_Block_Destroy(&block);
+    return HP_ERROR;
 }
