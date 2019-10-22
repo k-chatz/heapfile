@@ -89,7 +89,7 @@ HP_ErrorCode HP_CreateFile(const char *filename) {
     infoBlockData = BF_Block_GetData(infoBlock);
     _setCharacteristic(infoBlockData, CHARACTERISTIC);
     _setUsedBlocks(infoBlockData, 0);
-    _setDataBlockNumber(infoBlockData, 0);
+    _setDataBlockNumber(infoBlockData, -1);
     _setNext(infoBlockData, -1);
     BF_Block_SetDirty(infoBlock);
     CALL_BF(BF_UnpinBlock(infoBlock))
@@ -139,7 +139,7 @@ HP_ErrorCode HP_InsertEntry(int fileDesc, Record record) {
     _getDataBlockNumber(infoBlockData, &next);
 
     // If data block not yet exists, then a new one is about to be created.
-    if (!next) {
+    if (next < 0) {
         CALL_BF(BF_AllocateBlock(fileDesc, block));
         blockData = BF_Block_GetData(block);
         _setRecord(blockData, 0, &record);
