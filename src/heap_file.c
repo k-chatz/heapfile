@@ -111,8 +111,8 @@ HP_ErrorCode HP_OpenFile(const char *fileName, int *fileDesc) {
     if (characteristic != CHARACTERISTIC) {
         return HP_ERROR;
     }
-    //CALL_BF(BF_UnpinBlock(infoBlock))
-    //BF_Block_Destroy(&infoBlock);
+    CALL_BF(BF_UnpinBlock(infoBlock))
+    BF_Block_Destroy(&infoBlock);
     return HP_OK;
 }
 
@@ -131,10 +131,6 @@ HP_ErrorCode HP_InsertEntry(int fileDesc, Record record) {
 
     CALL_BF(BF_GetBlock(fileDesc, 0, infoBlock));
     infoBlockData = BF_Block_GetData(infoBlock);
-    _getCharacteristic(infoBlockData, &characteristic);
-    if (characteristic != CHARACTERISTIC) {
-        return HP_ERROR;
-    }
     _getUsedBlocks(infoBlockData, &usedBlocks);
     _getDataBlockNumber(infoBlockData, &next);
 
@@ -252,6 +248,7 @@ HP_ErrorCode HP_GetEntry(int fileDesc, int rowId, Record *record) {
     BF_Block_Init(&infoBlock);
     CALL_BF(BF_GetBlock(fileDesc, 0, infoBlock))
     infoBlockData = BF_Block_GetData(infoBlock);
+    _getCharacteristic(infoBlockData, &next);
     _getDataBlockNumber(infoBlockData, &next);
     if (next) {
         do {

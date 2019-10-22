@@ -81,8 +81,8 @@ void TestFileScan(int fileDesc) {
 
 int main() {
 
-    BF_Init(LRU);
-    //BF_Init(MRU);
+    //BF_Init(LRU);
+    BF_Init(MRU);
 
     CALL_OR_DIE(HP_Init());
 
