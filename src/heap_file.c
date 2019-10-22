@@ -192,10 +192,9 @@ HP_ErrorCode HP_InsertEntry(int fileDesc, Record record) {
         } while (next > 0);
     }
 
-    BF_Block_Destroy(&block);
-
     CALL_BF(BF_UnpinBlock(infoBlock));
     BF_Block_Destroy(&infoBlock);
+    BF_Block_Destroy(&block);
     return HP_OK;
 }
 
