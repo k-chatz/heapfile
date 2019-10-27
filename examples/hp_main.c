@@ -5,7 +5,7 @@
 #include "bf.h"
 #include "heap_file.h"
 
-#define RECORDS_NUM 1700
+#define RECORDS_NUM 1000
 
 const char *names[] = {
         "Yannis",
@@ -80,9 +80,8 @@ void TestFileScan(int fileDesc) {
 }
 
 int main() {
-
-    //BF_Init(LRU);
-    BF_Init(MRU);
+    BF_Init(LRU);
+    //BF_Init(MRU);
 
     CALL_OR_DIE(HP_Init());
 
